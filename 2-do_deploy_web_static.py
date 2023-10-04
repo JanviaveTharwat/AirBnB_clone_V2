@@ -6,9 +6,9 @@ from datetime import datetime
 from os import path
 
 
-env.hosts = ['100.25.19.204', '54.157.159.85']
+env.hosts = ['107.22.142.201', '35.153.57.148']
 env.user = 'ubuntu'
-env.key_filename = '~/.ssh/id_rsa'
+env.key_filename = '~/.ssh/school.pub'
 
 
 def do_deploy(archive_path):
