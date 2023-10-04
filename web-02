@@ -1,11 +1,11 @@
-#!/usr/bin/env bashol4233cb8f45.6af05482.alx-cod.online
-# server web-02 login8f45.6af05482.alx-cod.online's password:
-ssh ubuntu@107.22.142.201
+#!/usr/bin/env bash
+# server web-02 login
+
 # setting up ssh-agent
 eval $("ssh-agent")
-~
+
 # path to identifier file
 ssh-add ~/.ssh/school
-~
+
 #username and IP address
 ssh ubuntu@35.153.57.148
