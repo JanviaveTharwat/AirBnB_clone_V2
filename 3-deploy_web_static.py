@@ -3,10 +3,9 @@
 Fabric script based on the file 2-do_deploy_web_static.py that creates and
 distributes an archive to the web servers
 """
-
-from fabric.api import env, local, put, run
+from fabric.api import local, env, run, put
 from datetime import datetime
-from os.path import exists, isdir
+import os
 env.hosts = ['107.22.142.201', '35.153.57.148']
 env.user = 'ubuntu'
 
