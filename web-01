@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# server web-01 logincmder
+
+eval $('ssh-agent')p\cmder
+ssh-add ~/.ssh/school4233cb8f45.6af05482.alx-cod.online
+454233cb8f45@454233cb8f45.6af05482.alx-cod.online's password:
+ssh ubuntu@107.22.142.201
