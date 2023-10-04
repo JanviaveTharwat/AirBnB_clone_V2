@@ -5,6 +5,9 @@ from fabric.api import local, env, put, run
 from datetime import datetime
 from os.path import exists, isdir
 
+env.hosts = ['107.22.142.201', '35.153.57.148']
+env.user = "ubuntu"
+
 
 def do_pack():
     """generates a tgz archive"""
