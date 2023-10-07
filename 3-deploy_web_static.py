@@ -1,51 +1,93 @@
 #!/usr/bin/python3
-# Fabfile to create and distribute an archive to a web server.
-
-from fabric.api import local, env, put, run
+"""a script to pack static content into a tarball
+"""
+from fabric.api import *
+from fabric.operations import put
 from datetime import datetime
-from os.path import exists, isdir
+import os
 
 env.hosts = ['107.22.142.201', '35.153.57.148']
-env.user = "ubuntu"
+
+
 
 
 def do_pack():
-    """generates a tgz archive"""
-    try:
-        date = datetime.now().strftime("%Y%m%d%H%M%S")
-        if isdir("versions") is False:
-            local("mkdir versions")
-        file_name = "versions/web_static_{}.tgz".format(date)
-        local("tar -cvzf {} web_static".format(file_name))
-        return file_name
-    except Exception:
+    """packages all contents from web_static into .tgz archive
+    """
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    local('mkdir -p versions')
+    filename = 'versions/web_static_{}.tgz'.format(now)
+    result = local('tar -cvzf {} web_static'
+                   .format(filename), capture=True)
+    if result.failed:
+        print('Failed to create tar package')
         return None
+    else:
+        return filename
 
 
 def do_deploy(archive_path):
-    """distributes an archive to the web servers"""
-    if exists(archive_path) is False:
+    """deploys a static archive to web servers
+    """
+    if not os.path.isfile(archive_path):
+        print('archive file does not exist...')
         return False
     try:
-        file_n = archive_path.split("/")[-1]
-        no_ext = file_n.split(".")[0]
-        path = "/data/web_static/releases/"
-        put(archive_path, '/tmp/')
-        run('mkdir -p {}{}/'.format(path, no_ext))
-        run('tar -xzf /tmp/{} -C {}{}/'.format(file_n, path, no_ext))
-        run('rm /tmp/{}'.format(file_n))
-        run('mv {0}{1}/web_static/* {0}{1}/'.format(path, no_ext))
-        run('rm -rf {}{}/web_static'.format(path, no_ext))
-        run('rm -rf /data/web_static/current')
-        run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
-        return True
-    except Exception:
+        archive = archive_path.split('/')[1]
+        no_ext_archive = archive.split('.')[0]
+    except:
+        print('failed to get archive name from split...')
         return False
+    uploaded = put(archive_path, '/tmp/')
+    if uploaded.failed:
+        return False
+    res = run('mkdir -p /data/web_static/releases/{}/'.format(no_ext_archive))
+    if res.failed:
+        print('failed to create archive directory for relase...')
+        return False
+    res = run('tar -C /data/web_static/releases/{} -xzf /tmp/{}'.format(
+               no_ext_archive, archive))
+    if res.failed:
+        print('failed to untar archive...')
+        return False
+    res = run('rm /tmp/{}'.format(archive))
+    if res.failed:
+        print('failed to remove archive...')
+        return False
+    res = run('mv /data/web_static/releases/{}/web_static/* \
+               /data/web_static/releases/{}'
+              .format(no_ext_archive, no_ext_archive))
+    if res.failed:
+        print('failed to move extraction to proper directory...')
+        return False
+    res = run('rm -rf /data/web_static/releases/{}/web_static'
+              .format(no_ext_archive))
+    if res.failed:
+        print('failed to remove first copy of extraction after move...')
+        return False
+    # clean up old release and remove it
+    res = run('rm -rf /data/web_static/current')
+    if res.failed:
+        print('failed to clean up old release...')
+        return False
+    res = run('ln -sfn /data/web_static/releases/{} /data/web_static/current'
+              .format(no_ext_archive))
+    if res.failed:
+        print('failed to create link to new release...')
+        return False
+
+    print('\nNew Version Successfuly Deployed!\n')
+
+    return True
 
 
 def deploy():
-    """creates and distributes an archive to the web servers"""
-    archive_path = do_pack()
-    if archive_path is None:
+    """deploy executes do_pack and do_deploy to deploy the latest
+        changes to the server list
+    """
+    ar_path = do_pack()
+    print(ar_path)
+    if ar_path is None:
+        print('Failed to create archive from web_static')
         return False
-    return do_deploy(archive_path)
+    return do_deploy(ar_path)
