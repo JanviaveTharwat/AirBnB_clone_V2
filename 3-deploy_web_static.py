@@ -9,8 +9,6 @@ import os
 env.hosts = ['107.22.142.201', '35.153.57.148']
 
 
-
-
 def do_pack():
     """packages all contents from web_static into .tgz archive
     """
