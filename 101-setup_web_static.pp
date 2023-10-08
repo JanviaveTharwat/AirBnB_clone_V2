@@ -23,7 +23,7 @@ $nginx_conf = "server {
 package { 'nginx':
   ensure   => 'present',
   provider => 'apt'
-}
+  }
 
 -> file { '/data':
   ensure  => 'directory'
